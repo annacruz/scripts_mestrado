@@ -67,15 +67,6 @@ def _handle_portstats_received (event):
   log.debug("PortStatsReceived from %s: %s", 
     dpidToStr(event.connection.dpid), stats)
 
-def _handle_portstatus (event):
-  if event.added:
-    action = "added"
-  elif event.deleted:
-    action = "removed"
-  else:
-    action = "modified"
-  print "PortStatus: Port %s on Switch %s has been %s." % (event.port, event.dpid, action)
-    
 # main functiont to launch the module
 def launch ():
   from pox.lib.recoco import Timer
@@ -85,8 +76,6 @@ def launch ():
     _handle_flowstats_received) 
   #core.openflow.addListenerByName("PortStatsReceived", 
   #  _handle_portstats_received)
-  #core.openflow.addListenerByName("PortStatus",
-  #  _handle_portstatus) 
 
   # timer set to execute every five seconds
   Timer(5, _timer_func, recurring=True)
