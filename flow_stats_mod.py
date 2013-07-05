@@ -1,6 +1,6 @@
 #!/usr/bin/python
-# Author: Anna Cruz <anna.cruz@uniriotec.br> 
-# 
+# Author: Anna Cruz <anna.cruz@uniriotec.br>
+#
 # This file is a script to be used as POX module.
 #
 # POX is free software: you can redistribute it and/or modify
@@ -30,9 +30,10 @@ from pox.openflow.of_json import *
 
 log = core.getLogger()
 
+
 # handler for timer function that sends the requests to all the
 # switches connected to the controller.
-def _timer_func ():
+def _timer_func():
   for connection in core.openflow._connections.values():
     connection.send(of.ofp_stats_request(body=of.ofp_flow_stats_request()))
     connection.send(of.ofp_stats_request(body=of.ofp_port_stats_request()))
