@@ -1,8 +1,7 @@
 #!/usr/bin/python
-# Copyright 2012 William Yu
-# wyu@ateneo.edu
-#
-# This file is part of POX.
+# Author: Anna Cruz <anna.cruz@uniriotec.br> 
+# 
+# This file is a script to be used as POX module.
 #
 # POX is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,17 +18,14 @@
 #
 
 """
-This is a demonstration file created to show how to obtain flow 
-and port statistics from OpenFlow 1.0-enabled switches. The flow
-statistics handler contains a summary of web-only traffic.
+This script collects flow informations on all switches connected
+in this instance of POX.
 """
 
 # standard includes
 from pox.core import core
 from pox.lib.util import dpidToStr
 import pox.openflow.libopenflow_01 as of
-
-# include as part of the betta branch
 from pox.openflow.of_json import *
 
 log = core.getLogger()
@@ -49,7 +45,7 @@ def _handle_flowstats_received (event):
   log.debug("FlowStatsReceived from %s: %s", 
     dpidToStr(event.connection.dpid), stats)
 
-  # Get number of bytes/packets in flows for web traffic only
+  # Get the statistics of flow to any port 
   web_bytes = 0
   web_flows = 0
   web_packet = 0
@@ -76,15 +72,6 @@ def _handle_portstats_received (event):
   log.debug("PortStatsReceived from %s: %s", 
     dpidToStr(event.connection.dpid), stats)
 
-def _handle_portstatus (event):
-  if event.added:
-    action = "added"
-  elif event.deleted:
-    action = "removed"
-  else:
-    action = "modified"
-  print "PortStatus: Port %s on Switch %s has been %s." % (event.port, event.dpid, action)
-    
 # main functiont to launch the module
 def launch ():
   from pox.lib.recoco import Timer
@@ -94,8 +81,6 @@ def launch ():
     _handle_flowstats_received) 
   #core.openflow.addListenerByName("PortStatsReceived", 
   #  _handle_portstats_received)
-  #core.openflow.addListenerByName("PortStatus",
-  #  _handle_portstatus) 
 
   # timer set to execute every five seconds
   Timer(5, _timer_func, recurring=True)
