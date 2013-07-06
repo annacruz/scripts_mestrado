@@ -42,11 +42,15 @@ def _timer_func():
 # handler to display flow statistics received in JSON format
 # structure of event.stats is defined by ofp_flow_stats()
 def _handle_flowstats_received (event):
-  stats = flow_stats_to_list(event.stats)
-  log.info("FlowStatsReceived from %s: %s", 
-    dpidToStr(event.connection.dpid), stats)
+  flows_stats = flow_stats_to_list(event.stats)
+  if len(flows_stats) != 0:
+    for brute_flow in flows_stats:
+      flow = transform_to_dict(brute_flow)
 
-  # Get the statistics of flow to any port 
+    log.info("FlowStatsReceived from %s: %s || %s",
+    dpidToStr(event.connection.dpid), flows_stats, flow['tp_dst'])
+
+  # Get the statistics of flow to any port
  # web_bytes = 0
  # web_flows = 0
  # web_packet = 0
@@ -64,12 +68,15 @@ def _handle_flowstats_received (event):
  #   nw_dst = f.match.nw_dst
  #   nw_src = f.match.nw_src
  #   in_port = f.match.in_port
- # log.info("Traffic from %s: %s packets || %s flows || %s dst port and %s src port || %s dst ip and %s src ip || %s in_port", 
+ # log.info("Traffic from %s: %s packets || %s flows || %s dst port and %s src port || %s dst ip and %s src ip || %s in_port",
  #   dpidToStr(event.connection.dpid), web_packet, web_flows, tp_dst, tp_src, nw_dst, nw_src, in_port)
+
+def transform_to_dict(data):
+  return dict((key,value) for key,value in data.iteritems())
 
 def _handle_portstats_received (event):
   stats = flow_stats_to_list(event.stats)
-  log.info("PortStatsReceived from %s: %s", 
+  log.info("PortStatsReceived from %s: %s",
     dpidToStr(event.connection.dpid), stats)
 
 # main functiont to launch the module
