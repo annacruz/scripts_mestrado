@@ -27,8 +27,12 @@ from pox.core import core
 from pox.lib.util import dpidToStr
 import pox.openflow.libopenflow_01 as of
 from pox.openflow.of_json import *
+from pymongo import MongoClient
 
 log = core.getLogger()
+client = MongoClient('localhost', 27017)
+db = client.pox_stats
+flow_collection = db.flow_collection
 
 
 # handler for timer function that sends the requests to all the
@@ -43,33 +47,20 @@ def _timer_func():
 # structure of event.stats is defined by ofp_flow_stats()
 def _handle_flowstats_received (event):
   flows_stats = flow_stats_to_list(event.stats)
+  to_collection = {}
   if len(flows_stats) != 0:
     for brute_flow in flows_stats:
       flow = transform_to_dict(brute_flow)
+      #log.info(flow['priority'])
+      flow_collection.insert(flow['priority'])
 
-    log.info("FlowStatsReceived from %s: %s || %s",
-    dpidToStr(event.connection.dpid), flows_stats, flow['tp_dst'])
+#    log.info("FlowStatsReceived from %s: %s || %s",
+#    dpidToStr(event.connection.dpid), flows_stats, flow['match']['in_port'])
+    log.info("%s", flow['match']['in_port'])
+  
+  #log.info("FlowStatsReceived from %s: %s ",
+  #dpidToStr(event.connection.dpid), flows_stats )
 
-  # Get the statistics of flow to any port
- # web_bytes = 0
- # web_flows = 0
- # web_packet = 0
- # tp_dst = 0
- # tp_src = 0
- # nw_dst = 0
- # nw_src = 0
- # in_port = 0
- # for f in event.stats:
- #   web_bytes += f.byte_count
- #   web_packet += f.packet_count
- #   web_flows += 1
- #   tp_dst = f.match.tp_dst
- #   tp_src = f.match.tp_src
- #   nw_dst = f.match.nw_dst
- #   nw_src = f.match.nw_src
- #   in_port = f.match.in_port
- # log.info("Traffic from %s: %s packets || %s flows || %s dst port and %s src port || %s dst ip and %s src ip || %s in_port",
- #   dpidToStr(event.connection.dpid), web_packet, web_flows, tp_dst, tp_src, nw_dst, nw_src, in_port)
 
 def transform_to_dict(data):
   return dict((key,value) for key,value in data.iteritems())
