@@ -62,9 +62,10 @@ def _timer_func():
   #dpidToStr(event.connection.dpid), flows_stats )
 
 def _handle_flowstats_received(event):
-  dp_id = rf_id(event.connection.dpid)
-  db.update(dp_id, "switch", flows=StatsDB.create_flow_stats_list(event.stats))
-
+  dp_id = event.connection.dpid
+  flow = create_flow_stats_list(event.stats)
+  flow_dict = dict((key,value) for key,value in flow.iteritems())
+  flow_collection.update(dp_id, "switch", flows=flow_dict)
 
 def create_flow_stats_list(flows):
   flowlist = []
@@ -72,7 +73,7 @@ def create_flow_stats_list(flows):
       flowlist.append({
       "length": len(flow),
       "table_id": flow.table_id,
-      "match": StatsDB.create_match_dict(flow.match),
+      "match": create_match_dict(flow.match),
       "duration_sec": flow.duration_sec,
       "duration_nsec": flow.duration_nsec,
       "priority": flow.priority,
@@ -81,7 +82,7 @@ def create_flow_stats_list(flows):
       "cookie": flow.cookie,
       "packet_count": flow.packet_count,
       "byte_count": flow.byte_count,
-      "actions": StatsDB.create_actions_list(flow.actions),
+      "actions": create_actions_list(flow.actions),
       })
   return flowlist
 
@@ -108,8 +109,14 @@ def create_aggregate_stats_dict(aggregate):
   "flow_count": aggregate.flow_count,
   }
 
-def transform_to_dict(data):
-  return dict((key,value) for key,value in data.iteritems())
+def create_actions_list(actions):
+# TODO: do this properly and not depending on POX behavior
+  actionlist = []
+  for action in actions:
+    string = action.__class__.__name__ + "["
+    string += action.show().strip("\n").replace("\n", ", ") + "]"
+    actionlist.append(string)
+  return actionlist
 
 def _handle_portstats_received (event):
   stats = flow_stats_to_list(event.stats)
