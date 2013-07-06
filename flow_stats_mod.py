@@ -37,40 +37,39 @@ def _timer_func():
   for connection in core.openflow._connections.values():
     connection.send(of.ofp_stats_request(body=of.ofp_flow_stats_request()))
     connection.send(of.ofp_stats_request(body=of.ofp_port_stats_request()))
-  log.debug("Sent %i flow/port stats request(s)", len(core.openflow._connections))
+  log.info("Sent %i flow/port stats request(s)", len(core.openflow._connections))
 
 # handler to display flow statistics received in JSON format
 # structure of event.stats is defined by ofp_flow_stats()
 def _handle_flowstats_received (event):
   stats = flow_stats_to_list(event.stats)
-  log.debug("FlowStatsReceived from %s: %s", 
+  log.info("FlowStatsReceived from %s: %s", 
     dpidToStr(event.connection.dpid), stats)
 
   # Get the statistics of flow to any port 
-  web_bytes = 0
-  web_flows = 0
-  web_packet = 0
-  tp_dst = 0
-  tp_src = 0
-  nw_dst = 0
-  nw_src = 0
-  in_port = 0
-  for f in event.stats:
-    web_bytes += f.byte_count
-    web_packet += f.packet_count
-    web_flows += 1
-    tp_dst = f.match.tp_dst
-    tp_src = f.match.tp_src
-    nw_dst = f.match.nw_dst
-    nw_src = f.match.nw_src
-    in_port = f.match.in_port
-  log.info("Traffic from %s: %s packets || %s flows || %s dst port and %s src port || %s dst ip and %s src ip || %s in_port", 
-    dpidToStr(event.connection.dpid), web_packet, web_flows, tp_dst, tp_src, nw_dst, nw_src, in_port)
+ # web_bytes = 0
+ # web_flows = 0
+ # web_packet = 0
+ # tp_dst = 0
+ # tp_src = 0
+ # nw_dst = 0
+ # nw_src = 0
+ # in_port = 0
+ # for f in event.stats:
+ #   web_bytes += f.byte_count
+ #   web_packet += f.packet_count
+ #   web_flows += 1
+ #   tp_dst = f.match.tp_dst
+ #   tp_src = f.match.tp_src
+ #   nw_dst = f.match.nw_dst
+ #   nw_src = f.match.nw_src
+ #   in_port = f.match.in_port
+ # log.info("Traffic from %s: %s packets || %s flows || %s dst port and %s src port || %s dst ip and %s src ip || %s in_port", 
+ #   dpidToStr(event.connection.dpid), web_packet, web_flows, tp_dst, tp_src, nw_dst, nw_src, in_port)
 
-# handler to display port statistics received in JSON format
 def _handle_portstats_received (event):
   stats = flow_stats_to_list(event.stats)
-  log.debug("PortStatsReceived from %s: %s", 
+  log.info("PortStatsReceived from %s: %s", 
     dpidToStr(event.connection.dpid), stats)
 
 # main functiont to launch the module
