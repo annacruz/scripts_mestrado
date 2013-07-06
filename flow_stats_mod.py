@@ -64,8 +64,11 @@ def _timer_func():
 def _handle_flowstats_received(event):
   dp_id = event.connection.dpid
   flow = create_flow_stats_list(event.stats)
-  flow_dict = dict((key,value) for key,value in flow.iteritems())
-  flow_collection.update(dp_id, "switch", flows=flow_dict)
+  if len(flow) != 0:
+    flow_dict = dict((key,value) for key,value in flow[0].items())
+    #test = reduce(lambda x, y: dict((k, v + y[k]) for k, v in x.iteritems()), flow_dict)
+    flow_collection.insert(flow_dict)
+    log.info("%s || %s",  flow_dict, flow_dict.__class__)  
 
 def create_flow_stats_list(flows):
   flowlist = []
