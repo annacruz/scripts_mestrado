@@ -45,22 +45,68 @@ def _timer_func():
 
 # handler to display flow statistics received in JSON format
 # structure of event.stats is defined by ofp_flow_stats()
-def _handle_flowstats_received (event):
-  flows_stats = flow_stats_to_list(event.stats)
-  to_collection = {}
-  if len(flows_stats) != 0:
-    for brute_flow in flows_stats:
-      flow = transform_to_dict(brute_flow)
+# def _handle_flowstats_received (event):
+#   flows_stats = flow_stats_to_list(event.stats)
+#   to_collection = {}
+#   if len(flows_stats) != 0:
+#     for brute_flow in flows_stats:
+#       flow = transform_to_dict(brute_flow)
       #log.info(flow['priority'])
-      flow_collection.insert(flow['priority'])
+      # flow_collection.insert(flow['priority'])
 
 #    log.info("FlowStatsReceived from %s: %s || %s",
 #    dpidToStr(event.connection.dpid), flows_stats, flow['match']['in_port'])
-    log.info("%s", flow['match']['in_port'])
-  
+    # log.info("%s", flow['match']['in_port'])
+
   #log.info("FlowStatsReceived from %s: %s ",
   #dpidToStr(event.connection.dpid), flows_stats )
 
+def _handle_flowstats_received(event):
+  dp_id = rf_id(event.connection.dpid)
+  db.update(dp_id, "switch", flows=StatsDB.create_flow_stats_list(event.stats))
+
+
+def create_flow_stats_list(flows):
+  flowlist = []
+  for flow in flows:
+      flowlist.append({
+      "length": len(flow),
+      "table_id": flow.table_id,
+      "match": StatsDB.create_match_dict(flow.match),
+      "duration_sec": flow.duration_sec,
+      "duration_nsec": flow.duration_nsec,
+      "priority": flow.priority,
+      "idle_timeout": flow.idle_timeout,
+      "hard_timeout": flow.hard_timeout,
+      "cookie": flow.cookie,
+      "packet_count": flow.packet_count,
+      "byte_count": flow.byte_count,
+      "actions": StatsDB.create_actions_list(flow.actions),
+      })
+  return flowlist
+
+def create_match_dict(match):
+  # TODO: do this properly and not depending on POX behavior
+  match = match.show().strip("\n").split("\n")
+  result = dict([attr.split(": ") for attr in match])
+  try:
+      w = result["wildcards"]
+      p = w[w.find("nw_dst"):]
+      s = p.find("(") + 2 # Strip (/
+      e = p.find(")")
+      netmask = int(p[s:e])
+  except:
+      netmask = 0
+  if netmask != 0 and "nw_dst" in result:
+      result["nw_dst"] = result["nw_dst"] + "/" + str(netmask)
+  return result
+
+def create_aggregate_stats_dict(aggregate):
+  return {
+  "packet_count": aggregate.packet_count,
+  "byte_count": aggregate.byte_count,
+  "flow_count": aggregate.flow_count,
+  }
 
 def transform_to_dict(data):
   return dict((key,value) for key,value in data.iteritems())
