@@ -73,14 +73,16 @@ def _handle_portstats_received (event):
     dpidToStr(event.connection.dpid), stats)
 
 # main functiont to launch the module
-def launch ():
+def launch():
   from pox.lib.recoco import Timer
 
   # attach handsers to listners
-  core.openflow.addListenerByName("FlowStatsReceived", 
-    _handle_flowstats_received) 
-  #core.openflow.addListenerByName("PortStatsReceived", 
-  #  _handle_portstats_received)
+  core.openflow.addListenerByName(
+      "FlowStatsReceived",
+      _handle_flowstats_received)
+  #core.openflow.addListenerByName(
+  #    "PortStatsReceived",
+  #    _handle_portstats_received)
 
   # timer set to execute every five seconds
   Timer(5, _timer_func, recurring=True)
