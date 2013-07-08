@@ -28,6 +28,9 @@ from pox.lib.util import dpidToStr
 import pox.openflow.libopenflow_01 as of
 from pox.openflow.of_json import *
 from pymongo import MongoClient
+from datetime import datetime
+import time
+
 
 log = core.getLogger()
 client = MongoClient('localhost', 27017)
@@ -66,7 +69,9 @@ def _handle_flowstats_received(event):
   flow = create_flow_stats_list(event.stats)
   if len(flow) != 0:
     flow_dict = dict((key,value) for key,value in flow[0].items())
-    #test = reduce(lambda x, y: dict((k, v + y[k]) for k, v in x.iteritems()), flow_dict)
+    dt = datetime.now()
+    now = time.mktime(dt.timetuple())
+    flow_dict['time'] = now
     flow_collection.insert(flow_dict)
     log.info("%s || %s",  flow_dict, flow_dict.__class__)  
 
