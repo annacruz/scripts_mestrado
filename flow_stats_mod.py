@@ -46,34 +46,19 @@ def _timer_func():
     connection.send(of.ofp_stats_request(body=of.ofp_port_stats_request()))
   log.info("Sent %i flow/port stats request(s)", len(core.openflow._connections))
 
-# handler to display flow statistics received in JSON format
-# structure of event.stats is defined by ofp_flow_stats()
-# def _handle_flowstats_received (event):
-#   flows_stats = flow_stats_to_list(event.stats)
-#   to_collection = {}
-#   if len(flows_stats) != 0:
-#     for brute_flow in flows_stats:
-#       flow = transform_to_dict(brute_flow)
-      #log.info(flow['priority'])
-      # flow_collection.insert(flow['priority'])
-
-#    log.info("FlowStatsReceived from %s: %s || %s",
-#    dpidToStr(event.connection.dpid), flows_stats, flow['match']['in_port'])
-    # log.info("%s", flow['match']['in_port'])
-
-  #log.info("FlowStatsReceived from %s: %s ",
-  #dpidToStr(event.connection.dpid), flows_stats )
-
 def _handle_flowstats_received(event):
-  dp_id = event.connection.dpid
+  dp_id = dpidToStr(event.connection.dpid)
   flow = create_flow_stats_list(event.stats)
   if len(flow) != 0:
     flow_dict = dict((key,value) for key,value in flow[0].items())
     dt = datetime.now()
     now = time.mktime(dt.timetuple())
     flow_dict['time'] = now
+    flow_dict['dp_id'] = dp_id
+    flow_dict['stats'] = flow_dict['match']
+    flow_dict.pop('match', None)
     flow_collection.insert(flow_dict)
-    log.info("%s || %s",  flow_dict, flow_dict.__class__)  
+    log.info("%s",  flow_dict)  
 
 def create_flow_stats_list(flows):
   flowlist = []
