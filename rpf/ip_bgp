@@ -1,0 +1,15 @@
+BGP table version is 0, local router ID is 10.0.0.2
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+              r RIB-failure, S Stale, R Removed
+Origin codes: i - IGP, e - EGP, ? - incomplete
+
+   Network          Next Hop            Metric LocPrf Weight Path
+*  172.31.1.0/24    40.0.0.4                               0 7678 7675 i
+*>                  10.0.0.1                 0             0 7675 i
+*> 172.31.2.0/24    0.0.0.0                  0         32768 i
+*  172.31.3.0/24    40.0.0.4                               0 7678 7677 i
+*>                  10.0.0.1                               0 7675 7677 i
+*  172.31.4.0/24    10.0.0.1                               0 7675 7678 i
+*>                  40.0.0.4                 0             0 7678 i
+
+Total number of prefixes 4
