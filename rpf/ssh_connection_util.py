@@ -19,9 +19,3 @@ def sudoExecute(transport, command, password):
     Returns stdout, stderr (after command execution)"""
     stdin, stdout, stderr = transport.exec_command("echo %s | sudo -S %s" % (password, command))
     return stdout, stderr
-
-def format_output(output):
-    result = []
-    for line in output.readlines():
-        result.append(line.split('\n'))
-    return result
