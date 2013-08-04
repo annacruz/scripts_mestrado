@@ -29,8 +29,7 @@ def convert_to_dict(crude):
 # '''
 
   keys = ["Type", "Network", "Next_Hop", "Metric", "LocPrf", "Weight", "Path"] # These keys are used only to mount the final dictionary
-  block = crude.split('\n\n')
-  lines = block[1].split('\n')
+  lines = crude.split('\n\n')[1].split('\n')
   header = lines.pop(0) # Removing the useless header
   header = header.replace('Next Hop', 'Next_Hop') # Go Horse!
 
@@ -55,3 +54,13 @@ def convert_to_dict(crude):
     output.append(dict(zip(keys, values)))
 
   return output
+
+def getting_interface(route_information):
+  brute_result = [x.strip() for x in route_information.split('\n') if x != ''][2]
+  start = brute_result.find('eth')
+  result = brute_result[start:len(brute_result)]
+  # Another option for the code above
+  # t = brute_result.split('eth')
+  # return t[1]
+
+  return result
