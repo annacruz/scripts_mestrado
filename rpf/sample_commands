@@ -1,1 +1,9 @@
 ssh -t ubuntu@192.169.1.102 'sudo vtysh -c "show ip route"'
+
+
+Python Ip Address Matching
+
+import ipaddress
+addr = ipaddress.ip_address(u'192.0.2.1')
+>>> addr in ipaddress.ip_network(u'192.0.0.0/16')
+True
