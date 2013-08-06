@@ -1,6 +1,10 @@
 #!/usr/env python
 import re
 
+## TODO:
+##   1 - Make this a class
+##   2 - Test with another BGP table with network like xxx.xx.xx.x/16
+
 def format_output(output):
     result = []
     for line in output.readlines():
@@ -60,7 +64,6 @@ def getting_interface(route_information):
   start = brute_result.find('eth')
   result = brute_result[start:len(brute_result)]
   # Another option for the code above
-  # t = brute_result.split('eth')
-  # return t[1]
+  # return brute_result.split('eth')[1]
 
   return result
