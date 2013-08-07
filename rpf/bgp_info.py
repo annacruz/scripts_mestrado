@@ -4,6 +4,9 @@ from ssh_connection_util import Ssh
 from bgp_table_util import Util
 from pymongo import MongoClient
 
+# TODO:
+#   Daemonize
+
 host = '192.169.1.101'
 username = 'ubuntu'
 password = 'ubuntu'
@@ -24,4 +27,5 @@ connection.close()
 bgpDict = util.convert_to_dict(resultSet)
 
 collection.insert(bgpDict)
+
 print bgpDict
