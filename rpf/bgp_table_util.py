@@ -58,6 +58,11 @@ class Util:
       values = [x.strip() for x in values[0]]
       output.append(dict(zip(keys, values)))
 
+    # If no network is inputed, then the network is the previous value
+    for index in range(len(output)):
+      if output[index].get('Network') == '':
+      output[index]['Network'] = output[index-1]['Network']
+
     return output
 
   def getting_interface(self, route_information):
