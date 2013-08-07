@@ -11,7 +11,7 @@ class Util:
           result.append(line.split('\n'))
       return result
 
-  def convert_to_dict(self, crude):
+  def convert_to_dict(self, info):
   # Sample input to test
   # crude = '''
   # BGP table version is 0, local router ID is 10.0.0.2
@@ -33,6 +33,7 @@ class Util:
   # '''
 
     keys = ["Type", "Network", "Next_Hop", "Metric", "LocPrf", "Weight", "Path"] # These keys are used only to mount the final dictionary
+    crude = ''.join(info)
     lines = crude.split('\n\n')[1].split('\n')
     header = lines.pop(0) # Removing the useless header
     header = header.replace('Next Hop', 'Next_Hop') # Go Horse!
