@@ -16,9 +16,8 @@ timeout = 60
 
 command = "sudo vtysh -c 'show ip bgp'"
 
-connection = Ssh.connect(host, username, password, timeout)
-
-
-resultSet, stderr = Ssh.sudoExecute(connection, command, password)
+ssh = Ssh()
+connection = ssh.connect(host=host, username=username, password=password, timeout=timeout)
+resultSet, stderr = ssh.sudoExecute(connection, command, password)
 
 print resultSet
