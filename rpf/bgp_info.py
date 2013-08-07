@@ -15,7 +15,7 @@ util = Util()
 
 connection = ssh.connect(host=host, username=username, password=password, timeout=timeout)
 resultSet, stderr = ssh.sudoExecute(connection, command, password)
-
+connection.close() 
 bgpDict = util.convert_to_dict(resultSet)
 
 print bgpDict
