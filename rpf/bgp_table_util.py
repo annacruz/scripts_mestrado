@@ -61,7 +61,7 @@ class Util:
     # If no network is inputed, then the network is the previous value
     for index in range(len(output)):
       if output[index].get('Network') == '':
-      output[index]['Network'] = output[index-1]['Network']
+        output[index]['Network'] = output[index-1]['Network']
 
     return output
 
