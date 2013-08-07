@@ -21,4 +21,4 @@ class Ssh:
         """Executes the given command via sudo.
         Returns stdout, stderr (after command execution)"""
         stdin, stdout, stderr = transport.exec_command("echo %s | sudo -S %s" % (password, command))
-        return stdout, stderr
+        return stdout.readlines, stderr.readlines
