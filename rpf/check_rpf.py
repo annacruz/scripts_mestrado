@@ -3,6 +3,9 @@ from pymongo import MongoClient
 import re
 import ipaddress
 
+# TODO:
+#   Convert to a script with arguments and config file
+
 client = MongoClient('localhost', 27017)
 db = client.stats
 collection = db.bgp_info
@@ -13,7 +16,7 @@ first_digits = entrance.split('.')[0]
 regex = re.compile(first_digits, re.IGNORECASE)
 
 resultSet = []
-for result in collection.find({"Network": regex }) : 
+for result in collection.find({"Network": regex }) :
   resultSet.append(result)
 
 address = ipaddress.ip_address(u'%s'%entrance)

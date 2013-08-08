@@ -2,7 +2,7 @@
 import re
 
 ## TODO:
-##   Test with another BGP table with network like xxx.xx.xx.x/16
+##   Test with another BGP table with network like xxx.xx.xx.x/16  => Maybe some little adjust in regexp
 class Util:
 
   def format_output(self, output):

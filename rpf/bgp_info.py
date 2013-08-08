@@ -5,7 +5,8 @@ from bgp_table_util import Util
 from pymongo import MongoClient
 
 # TODO:
-#   Daemonize
+#   Config file
+#   Daemonize and execute from times to times
 
 host = '192.169.1.101'
 username = 'ubuntu'
