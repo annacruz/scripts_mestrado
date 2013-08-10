@@ -1,13 +1,19 @@
 #! /usr/bin/env python
+
+from ssh_connection_util import Ssh
+from bgp_table_util import Util
+
 from pymongo import MongoClient
 import re
 import sys
 import ipaddress
 import json
 
+global config
+config = json.load(open("config/config.cfg"))
+
 def execute(entrance):
-  config = json.load(open("config/config.cfg"))
-  client = MongoClient(config['mongo_server'], int(config['mongo_port']))
+  client = MongoClient(config['mongo_server'], config['mongo_port'])
   db = client.stats
   collection = db.bgp_info
 
@@ -19,12 +25,26 @@ def execute(entrance):
     resultSet.append(result)
 
   address = ipaddress.ip_address(u'%s'%entrance)
-  checkedNetworks = {}
+  checked_networks = {}
   for result in resultSet:
     value = address in ipaddress.ip_network(u'%s'%result['Network'])
-    checkedNetworks[result['Network']] = value
+    checked_networks[result['Network']] = value
 
-  print checkedNetworks
+  return checked_networks
+
+def get_interfaces(network):
+
+  command = "show ip route %s" % network
+  ssh = Ssh()
+  util = Util()
+
+  connection = ssh.connect(host=host, username=username, password=password, timeout=timeout)
+  resultSet, stderr = ssh.sudoExecute(connection, command, password)
+  connection.close()
+
+  print util.getting_interface(resultSet)
 
 if __name__ == '__main__':
-  execute(sys.argv[1])
+  possible_networks = execute(sys.argv[1])
+  for network in possible_networks:
+    get_interfaces(network)
