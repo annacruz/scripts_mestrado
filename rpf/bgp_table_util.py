@@ -66,10 +66,12 @@ class Util:
     return output
 
   def getting_interface(self, route_information):
-    brute_result = [x.strip() for x in route_information.split('\n') if x != ''][2]
-    start = brute_result.find('eth')
-    result = brute_result[start:len(brute_result)]
+    #brute_result = [x.strip() for x in route_information.split('\n') if x != ''][2]
+    #start = brute_result.find('eth')
+    #result = brute_result[start:len(brute_result)]
     # Another option for the code above
     # return brute_result.split('eth')[1]
-
-    return result
+    clear_result = filter(lambda x: 'eth' in x,route_information)
+    
+    interface = clear_result[0].split('eth')[1]
+    return interface
