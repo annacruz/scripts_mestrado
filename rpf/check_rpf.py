@@ -44,6 +44,7 @@ def get_interfaces(network):
   print util.getting_interface(resultSet)
 
 if __name__ == '__main__':
-  possible_networks = execute(sys.argv[1])
+  all_networks = execute(sys.argv[1])
+  possible_networks = [key for (key,value) in all_networks.items() if value == True]
   for network in possible_networks:
     get_interfaces(network)
