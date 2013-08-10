@@ -3,15 +3,14 @@ from pymongo import MongoClient
 import re
 import sys
 import ipaddress
+import json
 
-# TODO:
-#   Convert to a script with arguments and config file
 def execute(entrance):
-  client = MongoClient('localhost', 27017)
+  config = json.load(open(path("config/config.cfg")))
+
+  client = MongoClient(config['mongo_server'], config['mongo_port'])
   db = client.stats
   collection = db.bgp_info
-
-  # entrance = '172.31.4.110'
 
   first_digits = entrance.split('.')[0]
   regex = re.compile(first_digits, re.IGNORECASE)
@@ -21,8 +20,11 @@ def execute(entrance):
     resultSet.append(result)
 
   address = ipaddress.ip_address(u'%s'%entrance)
+  checkedNetworks = {}
   for result in resultSet:
-    print address in ipaddress.ip_network(u'%s'%result['Network'])
+    checkedNetworks[result] = address in ipaddress.ip_network(u'%s'%result['Network'])
+
+  print checkedNetworks
 
 if __name__ == '__main__':
   execute(sys.argv[1])
