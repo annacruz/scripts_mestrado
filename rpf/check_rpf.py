@@ -6,9 +6,8 @@ import ipaddress
 import json
 
 def execute(entrance):
-  config = json.load(open(path("config/config.cfg")))
-
-  client = MongoClient(config['mongo_server'], config['mongo_port'])
+  config = json.load(open("config/config.cfg"))
+  client = MongoClient(config['mongo_server'], int(config['mongo_port']))
   db = client.stats
   collection = db.bgp_info
 
@@ -22,7 +21,8 @@ def execute(entrance):
   address = ipaddress.ip_address(u'%s'%entrance)
   checkedNetworks = {}
   for result in resultSet:
-    checkedNetworks[result] = address in ipaddress.ip_network(u'%s'%result['Network'])
+    value = address in ipaddress.ip_network(u'%s'%result['Network'])
+    checkedNetworks[result['Network']] = value
 
   print checkedNetworks
 
