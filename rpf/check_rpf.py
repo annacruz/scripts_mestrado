@@ -38,7 +38,7 @@ def get_interfaces(network):
   ssh = Ssh()
   util = Util()
 
-  connection = ssh.connect(host=host, username=username, password=password, timeout=timeout)
+  connection = ssh.connect(host=config['host'], username=config['username'], password=config['password'], timeout=config['timeout'])
   resultSet, stderr = ssh.sudoExecute(connection, command, password)
   connection.close()
 
