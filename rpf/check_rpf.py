@@ -35,7 +35,7 @@ def execute(entrance):
 
 def get_interfaces(network):
   """ Gets the tested network and connects to the router making an show ip route to this. After that, gets the interface of the matching networks """
-  hosts    = config['host']
+  hosts    = config['hosts']
   username = config['username']
   password = config['password']
   timeout  = config['timeout']
@@ -45,14 +45,26 @@ def get_interfaces(network):
   ssh  = Ssh()
   util = Util()
 
+  possible_interfaces = []
   for host in hosts:
     connection = ssh.connect(host=host, username=username, password=password, timeout=timeout)
     resultSet, stderr = ssh.sudoExecute(connection, command, config['password'])
     connection.close()
-    print util.getting_interface(resultSet)
+    possible_interfaces.append(util.getting_interface(resultSet))
+
+  return possible_interfaces
+
+def check_rpf(ip_interface, possible_interfaces):
+  if ip_interface in possible_interfaces:
+    print 'Passed in Check RPF'
+  else
+    print 'Failed in Check RPF'
+
 
 if __name__ == '__main__':
   all_networks = execute(sys.argv[1])
   possible_networks = [key for (key,value) in all_networks.items() if value == True]
+  possible_interfaces = []
   for network in possible_networks:
-    get_interfaces(network)
+    possible_interfaces = get_interfaces(network)
+  check_rpf(sys.argv[2], possible_interfaces)
