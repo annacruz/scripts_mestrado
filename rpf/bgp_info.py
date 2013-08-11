@@ -24,9 +24,10 @@ util = Util()
 
 connection = ssh.connect(host=host, username=username, password=password, timeout=timeout)
 resultSet, stderr = ssh.sudoExecute(connection, command, password)
+print resultSet
 connection.close()
 bgpDict = util.convert_to_dict(resultSet)
 
-collection.insert(bgpDict)
+collection.insert(bgpDict, host)
 
 print bgpDict

@@ -3,7 +3,7 @@ import re
 
 class Util:
 
-  def convert_to_dict(self, info):
+  def convert_to_dict(self, info, host):
     ## TODO:
     ##   Test with another BGP table with network like xxx.xx.xx.x/16  => Maybe some little adjust in regexp
     """ Gets bgp table and parse to a dictionary  """
@@ -38,7 +38,7 @@ class Util:
     for index in range(len(output)):
       if output[index].get('Network') == '':
         output[index]['Network'] = output[index-1]['Network']
-
+      output[index]['Router_Host'] = host
     return output
 
   def getting_interface(self, route_information):
