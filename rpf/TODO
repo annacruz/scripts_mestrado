@@ -1,3 +1,0 @@
-## TODO:
-## - Define the time of show ip bgp executes (to make a cool loop)
-## - Define a way to clean bgp info database or to just update the entries if it's duplicated
