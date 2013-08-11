@@ -1,6 +1,3 @@
 ## TODO:
-##  1 - Connect through ssh in a server/router OK
-##  2 - Get dict converted 'show ip bgp' from this router OK
-##  3 - Save this in mongodb collection OK
-##  4 - Choose an IP and search all possible networks in collection above OK
-##  5 - Get the interface of returned ip's (through 'show ip route xxx.xxx.xxx.xxx')
+## - Define the time of show ip bgp executes (to make a cool loop)
+## - Define a way to clean bgp info database or to just update the entries if it's duplicated

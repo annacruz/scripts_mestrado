@@ -13,6 +13,7 @@ global config
 config = json.load(open("config/config.cfg"))
 
 def execute(entrance):
+  """ Connects to the mongodb database and checks if the entrance ip has the first digits in registred networks in show ip bgp table """
   client = MongoClient(config['mongo_server'], config['mongo_port'])
   db = client.stats
   collection = db.bgp_info
@@ -33,7 +34,7 @@ def execute(entrance):
   return checked_networks
 
 def get_interfaces(network):
-
+  """ Gets the tested network and connects to the router making an show ip route to this. After that, gets the interface of the matching networks """
   command = "sudo vtysh -c 'show ip route %s'" % network
   ssh = Ssh()
   util = Util()

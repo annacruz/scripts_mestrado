@@ -1,36 +1,12 @@
 #!/usr/env python
 import re
 
-## TODO:
-##   Test with another BGP table with network like xxx.xx.xx.x/16  => Maybe some little adjust in regexp
 class Util:
 
-  def format_output(self, output):
-      result = []
-      for line in output.readlines():
-          result.append(line.split('\n'))
-      return result
-
   def convert_to_dict(self, info):
-  # Sample input to test
-  # crude = '''
-  # BGP table version is 0, local router ID is 10.0.0.2
-  # Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
-  #               r RIB-failure, S Stale, R Removed
-  # Origin codes: i - IGP, e - EGP, ? - incomplete
-
-  #    Network          Next Hop            Metric LocPrf Weight Path
-  # *  172.31.1.0/24    40.0.0.4                               0 7678 7675 i
-  # *>                  10.0.0.1                 0             0 7675 i
-  # *> 172.31.2.0/24    0.0.0.0                  0         32768 i
-  # *> 172.31.3.0/24    10.0.0.1                               0 7675 7677 i
-  # *                   40.0.0.4                               0 7678 7677 i
-  # *  172.31.4.0/24    10.0.0.1                               0 7675 7678 i
-  # *>                  40.0.0.4                 0             0 7678 i
-  # *> 000.00.0.0/00    00.0.0.0                 0      0      0 7678 0000 i
-
-  # Total numberof prefixes 4
-  # '''
+    ## TODO:
+    ##   Test with another BGP table with network like xxx.xx.xx.x/16  => Maybe some little adjust in regexp
+    """ Gets bgp table and parse to a dictionary  """
 
     keys = ["Type", "Network", "Next_Hop", "Metric", "LocPrf", "Weight", "Path"] # These keys are used only to mount the final dictionary
     crude = ''.join(info)
@@ -66,12 +42,10 @@ class Util:
     return output
 
   def getting_interface(self, route_information):
-    #brute_result = [x.strip() for x in route_information.split('\n') if x != ''][2]
-    #start = brute_result.find('eth')
-    #result = brute_result[start:len(brute_result)]
-    # Another option for the code above
-    # return brute_result.split('eth')[1]
-    clear_result = filter(lambda x: 'eth' in x,route_information)
-    
+    ## TOOD:
+    ##   Put more informations into the dict (like hops)
+    """ Gets the show ip route information and return a dict with network and interface """
+    clear_result = filter(lambda x: 'eth' in x,route_information) # This line filter the position in route_information that contains eth information to be returned
     interface = clear_result[0].split('eth')[1]
+
     return interface
