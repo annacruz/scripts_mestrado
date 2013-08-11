@@ -13,7 +13,7 @@ class BgpInfo(Daemon):
 
   def run(self):
     while True:
-      get_bgp_info()
+      self.get_bgp_info()
       time.sleep(30)
 
   def get_bgp_info(self):
@@ -41,7 +41,7 @@ class BgpInfo(Daemon):
       collection.insert(bgpDict)
 
 if __name__ == "__main__":
-  daemon = BgpInfo('/tmp/bgpinfo.pid')
+  daemon = BgpInfo('/home/yui/bgpinfo.pid', '/dev/null', '/home/yui/stdout.txt', '/home/yui/stderr.txt')
   if len(sys.argv) == 2:
     if 'start' == sys.argv[1]:
       daemon.start()
