@@ -35,14 +35,21 @@ def execute(entrance):
 
 def get_interfaces(network):
   """ Gets the tested network and connects to the router making an show ip route to this. After that, gets the interface of the matching networks """
+  hosts    = config['host']
+  username = config['username']
+  password = config['password']
+  timeout  = config['timeout']
+
   command = "sudo vtysh -c 'show ip route %s'" % network
-  ssh = Ssh()
+
+  ssh  = Ssh()
   util = Util()
 
-  connection = ssh.connect(host=config['host'], username=config['username'], password=config['password'], timeout=config['timeout'])
-  resultSet, stderr = ssh.sudoExecute(connection, command, config['password'])
-  connection.close()
-  print util.getting_interface(resultSet)
+  for host in hosts:
+    connection = ssh.connect(host=host, username=username, password=password, timeout=timeout)
+    resultSet, stderr = ssh.sudoExecute(connection, command, config['password'])
+    connection.close()
+    print util.getting_interface(resultSet)
 
 if __name__ == '__main__':
   all_networks = execute(sys.argv[1])
