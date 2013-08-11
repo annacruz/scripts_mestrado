@@ -39,11 +39,10 @@ class Util:
       if output[index].get('Network') == '':
         output[index]['Network'] = output[index-1]['Network']
       output[index]['Router_Host'] = host
+
     return output
 
   def getting_interface(self, route_information):
-    ## TOOD:
-    ##   Put more informations into the dict (like hops)
     """ Gets the show ip route information and return a dict with network and interface """
     clear_result = filter(lambda x: 'eth' in x,route_information) # This line filter the position in route_information that contains eth information to be returned
     interface = clear_result[0].split('eth')[1]
