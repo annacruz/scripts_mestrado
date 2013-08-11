@@ -17,7 +17,7 @@ class BgpInfo(Daemon):
       time.sleep(30)
 
   def get_bgp_info(self):
-    hosts     = config['host']
+    hosts     = config['hosts']
     username  = config['username']
     password  = config['password']
     timeout   = config['timeout']
