@@ -45,6 +45,6 @@ class Util:
   def getting_interface(self, route_information):
     """ Gets the show ip route information and return a dict with network and interface """
     clear_result = filter(lambda x: 'eth' in x,route_information) # This line filter the position in route_information that contains eth information to be returned
-    interface = clear_result[0].split('eth')[1]
+    interface = clear_result[0].split('eth')[1].strip()
 
     return interface

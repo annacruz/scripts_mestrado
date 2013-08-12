@@ -57,7 +57,7 @@ def get_interfaces(network):
 def check_rpf(ip_interface, possible_interfaces):
   if ip_interface in possible_interfaces:
     print 'Passed in Check RPF'
-  else
+  else:
     print 'Failed in Check RPF'
 
 
@@ -65,6 +65,9 @@ if __name__ == '__main__':
   all_networks = execute(sys.argv[1])
   possible_networks = [key for (key,value) in all_networks.items() if value == True]
   possible_interfaces = []
+  if len(possible_networks) == 0:
+    print 'No possible networks are found'
+    sys.exit(2)
   for network in possible_networks:
     possible_interfaces = get_interfaces(network)
   check_rpf(sys.argv[2], possible_interfaces)
