@@ -1,10 +1,13 @@
-#This directory contains the scripts used by my master thesis.
+#This repository contains the scripts used in my MD thesis.
 
 ##pox_plugins
-  - Contains the pox plugins that I created
+  - Contains the pox plugins that save stats in mongodb
 
 ##preparation
-  - Contains the scripts to get, convert and pass the flows or other informations to preapare to the use of other scripts
+  - Contains the scripts to get, convert and pass the flows or other informations preparing inputs to shannon entropy scripts
 
 ##rpf
-  - Contains the scripts to get route information used by check rpf and check rpf scripts
+  - Contains the scripts to get bgp route information saves in a database and check rpf
+
+##shannon_entropy
+  - Contains the scripts to calculate shannon entropy and ewma. (Original Author: Alex Moura)
