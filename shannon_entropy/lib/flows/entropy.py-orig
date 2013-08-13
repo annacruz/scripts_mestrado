@@ -1,0 +1,51 @@
+# coding=UTF-8
+
+# Descrição:
+# Esta classe sabe tratar arquivos de "fluxos", gerar um histograma dessas informações, aplicar um algoritmo para cálculo de entropia a este e, por fim, anexar o resultado num arquivo RRD.
+
+import glob
+import time
+import os
+
+from flowssample import FlowsSample
+from algorithms import shannon
+
+
+class Entropy:
+	
+	"""
+	Calcula entropia de arquivos de fluxos existentes num determinado diretório.
+	"""
+
+	def __init__(self, input_dir, filename_wildcard):
+    
+		""" 
+	    - input_dir: diretório que contém os dados filtrados
+	    - filename_wildcard: expressão regular utilizada para filtrar os arquivos desejados
+		"""
+		self.dir = input_dir
+		self.wildcard = filename_wildcard
+
+
+	def evaluate(self, algorithm, rrd_file):
+		
+		"""
+	    Processa as informações contidas nos arquivos selecionados em "self.input_dir" e 'appenda' as informações no "rrd_file".
+		"""
+
+		files = glob.glob(self.dir + '/' + self.wildcard)
+
+
+		for file in files:
+
+			histogram = FlowsSample(file).histogram()
+
+			result = algorithm(histogram, to_be_normalized = True) 
+
+			timestamp = file.split('/')[-1].split('-')[0]
+			timestamp_epoch = time.mktime( time.strptime( timestamp, "%Y%m%d%H%M" ) )
+
+			rrd_line = "%s:%f" % (timestamp_epoch, result) 
+			os.system('rrdtool update %s %s' % (rrd_file, rrd_line))
+			print "[ %s ] %s" % (rrd_file, rrd_line)
+			
