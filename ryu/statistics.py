@@ -1,110 +1,108 @@
-#! /usr/bin/env python
+#!/usr/bin/python
 
-import time
-import logging
-
+from ryu.base import app_manager
 from ryu.controller import ofp_event
-from ryu.controller.handler import MAIN_DISPATCHER
+from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER
 from ryu.controller.handler import set_ev_cls
 from ryu.ofproto import ofproto_v1_3
-from ryu.tests.integrated import tester
+from ryu.lib.packet import packet
+from ryu.lib.packet import ethernet
 
-LOG = logging.getLogger(__name__)
 
-class Statistics(tester.TestFlowBase):
+class StatsApp(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
+    RFVS_PREFIX = 0x72667673
 
     def __init__(self, *args, **kwargs):
-        super(RunTest, self).__init__(*args, **kwargs)
+        super(StatsApp, self).__init__(*args, **kwargs)
+        self.mac_to_port = {}
 
-        self._verify = None
-        self.n_tables = ofproto_v1_3.OFPTT_MAX
-        
-    def run_verify(self, ev):
-        msg = ev.msg
-        dp = msg.datapath
+    def send_flow_stats_request(self, datapath):
+      ofp = datapath.ofproto
+      ofp_parser = datapath.ofproto_parser
 
-        verify_func = self.verify_default
-        v = "verify" + self.current[4:]
-        if v in dir(self):
-            verify_func = getattr(self, v)
+      cookie = cookie_mask = 0
+      match = ofp_parser.OFPMatch(in_port=1)
+      req = ofp_parser.OFPFlowStatsRequest(datapath, 0,
+                                           ofp.OFPTT_ALL,
+                                           ofp.OFPP_ANY, ofp.OFPG_ANY,
+                                           cookie, cookie_mask,
+                                           match)
+      datapath.send_msg(req)
 
-        result = verify_func(dp, msg)
-        if result is True:
-            self.unclear -= 1
 
-        self.results[self.current] = result
-        self.start_next_test(dp)
-        
-    def verify_default(self, dp, msg):
-        type_ = self._verify
+    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
+    def switch_features_handler(self, ev):
+        datapath = ev.msg.datapath
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
 
-        if msg.msg_type == dp.ofproto.OFPT_STATS_REPLY:
-            return self.verify_stats(dp, msg.body, type_)
-        elif msg.msg_type == type_:
-            return True
-        else:
-            return 'Reply msg_type %s expected %s' \
-                   % (msg.msg_type, type_)
-            
-    def verify_stats(self, dp, stats, type_):
-        stats_types = dp.ofproto_parser.OFPStatsReply._STATS_TYPES
-        expect = stats_types.get(type_).__name__
+        # install table-miss flow entry
+        #
+        # We specify NO BUFFER to max_len of the output action due to
+        # OVS bug. At this moment, if we specify a lesser number, e.g.,
+        # 128, OVS will send Packet-In with invalid buffer_id and
+        # truncated packet data. In that case, we cannot output packets
+        # correctly.
+        match = parser.OFPMatch()
+        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
+                                          ofproto.OFPCML_NO_BUFFER)]
+        self.add_flow(datapath, 0, match, actions)
 
-        if isinstance(stats, list):
-            for s in stats:
-                if expect == s.__class__.__name__:
-                    return True
-        else:
-            if expect == stats.__class__.__name__:
-                return True
-        return 'Reply msg has not \'%s\' class.\n%s' % (expect, stats)
-    
-    def mod_flow(self, dp, cookie=0, cookie_mask=0, table_id=0,
-                 command=None, idle_timeout=0, hard_timeout=0,
-                 priority=0xff, buffer_id=0xffffffff, match=None,
-                 actions=None, inst_type=None, out_port=None,
-                 out_group=None, flags=0, inst=None):
+    def add_flow(self, datapath, priority, match, actions):
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
 
-        if command is None:
-            command = dp.ofproto.OFPFC_ADD
+        inst = [parser.OFPInstructionActions(ofproto.OFPIT_WRITE_ACTIONS,
+                                             actions)]
+        inst.append(parser.OFPInstructionGotoTable(1))
 
-        if inst is None:
-            if inst_type is None:
-                inst_type = dp.ofproto.OFPIT_APPLY_ACTIONS
+        mod = parser.OFPFlowMod(datapath=datapath, priority=priority,
+                                match=match, instructions=inst)
+        datapath.send_msg(mod)
+        self.logger.info("fluxo adicionado dp: %s - actions: %s", datapath, actions)
 
-            inst = []
-            if actions is not None:
-                inst = [dp.ofproto_parser.OFPInstructionActions(
-                        inst_type, actions)]
-
-        if match is None:
-            match = dp.ofproto_parser.OFPMatch()
-
-        if out_port is None:
-            out_port = dp.ofproto.OFPP_ANY
-
-        if out_group is None:
-            out_group = dp.ofproto.OFPG_ANY
-
-        m = dp.ofproto_parser.OFPFlowMod(dp, cookie, cookie_mask,
-                                         table_id, command,
-                                         idle_timeout, hard_timeout,
-                                         priority, buffer_id,
-                                         out_port, out_group,
-                                         flags, match, inst)
-
-        dp.send_msg(m)
-        
-    #def test_flow_add_goto_table(self, dp):
-    #    self._verify = dp.ofproto.OFPIT_GOTO_TABLE
-    #
-    #    inst = [dp.ofproto_parser.OFPInstructionGotoTable(0), ]
-    #    self.mod_flow(dp, inst=inst)
-    #    self.send_flow_stats(dp)
-
-    
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
-    def packet_in_handler(self, ev):
-        if self.current.find('packet_in'):
-            self.run_verify(ev)
+    def _packet_in_handler(self, ev):
+        msg = ev.msg
+        datapath = msg.datapath
+        datapath_id = msg.datapath.id
+        is_rfvs = lambda datapath_id: not ((datapath_id >> 16) ^ RFVS_PREFIX)
+        if not is_rfvs:
+          return 
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+        in_port = msg.match['in_port']
+
+        pkt = packet.Packet(msg.data)
+        eth = pkt.get_protocols(ethernet.ethernet)[0]
+
+        dst = eth.dst
+        src = eth.src
+
+        dpid = datapath.id
+        self.mac_to_port.setdefault(dpid, {})
+
+#        self.logger.info("packet in %s %s %s %s", dpid, src, dst, in_port)
+        # learn a mac address to avoid FLOOD next time.
+        self.mac_to_port[dpid][src] = in_port
+
+        if dst in self.mac_to_port[dpid]:
+            out_port = self.mac_to_port[dpid][dst]
+        else:
+            out_port = ofproto.OFPP_FLOOD
+
+        actions = [parser.OFPActionOutput(out_port)]
+
+        # install a flow to avoid packet_in next time
+        #if out_port != ofproto.OFPP_FLOOD:
+        #    match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
+        #    self.add_flow(datapath, 1, match, actions)
+
+        data = None
+        if msg.buffer_id == ofproto.OFP_NO_BUFFER:
+            data = msg.data
+
+        out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id,
+                                  in_port=in_port, actions=actions, data=data)
+        datapath.send_msg(out)
