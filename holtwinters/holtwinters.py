@@ -34,7 +34,7 @@ class HoltWinters:
         self.calculate_residual()
 
         self.forecast = self.season_temporal[-1] + self.trend_temporal[-1] + self.residual_temporal[-1]
-        return forecast
+        return self.forecast
 
     def calculate_season(self):
         """
@@ -56,7 +56,6 @@ class HoltWinters:
         """
         B[t] = beta * (L[t] - L[t-1]) + (1 - beta) * B[t-1] 
         """
-
         first = self.beta * (self.residual_temporal[-1] - self.residual_temporal[-2])
         second = (1 - self.beta) * self.trend_temporal[-1]
 
@@ -100,6 +99,6 @@ class HoltWinters:
         """
         [x(t) - (delta * deviation(t)), x(t) + (delta * deviation(t))]
         """
-        lower_band = forecast - (delta * deviation_historical[-1])
-        upper_band = forecast + (delta * deviation_historical[-1])
+        lower_band = self.forecast - (self.delta * self.deviation_historical[-1])
+        upper_band = self.forecast + (self.delta * self.deviation_historical[-1])
         return [lower_band, upper_band]
